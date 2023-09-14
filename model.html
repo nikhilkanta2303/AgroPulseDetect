@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+
+  <nav>
+    <h2>Namaste Farmer!</h2>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </nav>
+
+
+
+<center>
+<div id="top"><h2 id="title"><span id="titlesplit">Agro</span>Pulse Detect</h2></div>
+<p style="font-size: 12px;color: rgb(184, 40, 40);">_upload plant/crop image by clicking "choose file"</p>
+<input type="file" id="imageInput" accept="image/*">
+<br>
+<div id="buttonsection">
+<button type="button" onclick="predict()">Predict</button>
+<button type="button" onclick="reload()">Clear</button>
+</div>
+<br>
+<div><p>Expected Disease for this plant</p></div>
+<div id="label-container"></div>
+</center>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<script type="text/javascript">
+const reload = () => window.location.reload();
+
+const modelURL = "https://teachablemachine.withgoogle.com/models/ePrBnVGKR/";
+let model;
+const imageInput = document.getElementById('imageInput');
+
+const init = async () => {
+const modelJsonURL = `${modelURL}model.json`;
+const metadataURL = `${modelURL}metadata.json`;
+model = await tmImage.load(modelJsonURL, metadataURL);
+}
+
+const predict = async () => {
+const file = imageInput.files[0];
+if (file) {
+const reader = new FileReader();
+reader.onload = async function () {
+const img = new Image();
+img.src = reader.result;
+img.onload = async function () {
+const prediction = await model.predict(img);
+const labelContainer = document.getElementById("label-container");
+labelContainer.innerHTML = "";
+prediction.forEach(pred => {
+if (pred.probability.toFixed(2) > 0.5) { // Set your threshold here
+const classPrediction =
+`${pred.className}: ${pred.probability.toFixed(2)}`;
+const labelDiv = document.createElement("div");
+labelDiv.innerHTML = classPrediction;
+labelContainer.appendChild(labelDiv);
+}
+});
+};
+};
+reader.readAsDataURL(file);
+}
+}
+
+window.onload = init;
+</script>
+
+</body>
+</html>
