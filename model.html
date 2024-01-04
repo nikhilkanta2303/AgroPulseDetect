@@ -18,7 +18,7 @@
   <center>
     <div id="top"><h2 id="title"><span id="titlesplit">Agro</span>Pulse 〽️ Detect</h2></div>
     <p style="font-size: 12px;color: rgb(184, 40, 40);">_upload plant/crop image by clicking "choose file"</p>
-    <input type="file" id="imageInput" accept="image/*">
+    <video id="cameraFeed" autoplay playsinline style="max-width: 100%; max-height: 70vh;"></video>
     <br>
     <div id="buttonsection">
       <button type="button" onclick="switchCamera()">Switch Camera</button>
@@ -36,7 +36,7 @@
 
   <script type="text/javascript">
     let currentCamera = 'environment'; // 'environment' for back camera, 'user' for front camera
-    const imageInput = document.getElementById('imageInput');
+    const video = document.getElementById('cameraFeed');
     let videoStream;
 
     const switchCamera = async () => {
@@ -53,7 +53,7 @@
           },
         };
         videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-        document.getElementById('imageInput').srcObject = videoStream;
+        video.srcObject = videoStream;
       } catch (error) {
         console.error('Error accessing camera:', error);
       }
@@ -78,7 +78,6 @@
     }
 
     const predict = async () => {
-      const video = document.getElementById('imageInput');
       const prediction = await model.predict(video);
       const labelContainer = document.getElementById("label-container");
       labelContainer.innerHTML = "";
