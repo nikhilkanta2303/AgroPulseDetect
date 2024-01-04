@@ -2,10 +2,9 @@
 <html>
 <head>
   <link rel="stylesheet" href="style.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-
 
   <nav>
     <h2>Namaste Farmer! 🧑‍🌾</h2>
@@ -16,66 +15,86 @@
     </ul>
   </nav>
 
+  <center>
+    <div id="top"><h2 id="title"><span id="titlesplit">Agro</span>Pulse 〽️ Detect</h2></div>
+    <p style="font-size: 12px;color: rgb(184, 40, 40);">_upload plant/crop image by clicking "choose file"</p>
+    <input type="file" id="imageInput" accept="image/*">
+    <br>
+    <div id="buttonsection">
+      <button type="button" onclick="switchCamera()">Switch Camera</button>
+      <button type="button" onclick="captureImage()">Capture</button>
+      <button type="button" onclick="predict()">Predict</button>
+      <button type="button" onclick="reload()">Clear</button>
+    </div>
+    <br>
+    <div><p>Expected Disease for this plant</p></div>
+    <div id="label-container"></div>
+  </center>
 
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
-<center>
-<div id="top"><h2 id="title"><span id="titlesplit">Agro</span>Pulse 〽️ Detect</h2></div>
-<p style="font-size: 12px;color: rgb(184, 40, 40);">_upload plant/crop image by clicking "choose file"</p>
-<input type="file" id="imageInput" accept="image/*">
-<br>
-<div id="buttonsection">
-<button type="button" onclick="predict()">Predict</button>
-<button type="button" onclick="reload()">Clear</button>
-</div>
-<br>
-<div><p>Expected Disease for this plant</p></div>
-<div id="label-container"></div>
-</center>
+  <script type="text/javascript">
+    let currentCamera = 'environment'; // 'environment' for back camera, 'user' for front camera
+    const imageInput = document.getElementById('imageInput');
+    let videoStream;
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    const switchCamera = async () => {
+      currentCamera = (currentCamera === 'environment') ? 'user' : 'environment';
+      await captureImage(); // Stop the current stream
+      await startCamera(); // Start the new stream
+    }
 
-<script type="text/javascript">
-const reload = () => window.location.reload();
+    const startCamera = async () => {
+      try {
+        const constraints = {
+          video: {
+            facingMode: currentCamera,
+          },
+        };
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('imageInput').srcObject = videoStream;
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+      }
+    }
 
-const modelURL = "https://teachablemachine.withgoogle.com/models/_kFky0T01/";
-let model;
-const imageInput = document.getElementById('imageInput');
+    const captureImage = async () => {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+    }
 
-const init = async () => {
-const modelJsonURL = `${modelURL}model.json`;
-const metadataURL = `${modelURL}metadata.json`;
-model = await tmImage.load(modelJsonURL, metadataURL);
-}
+    const reload = () => window.location.reload();
 
-const predict = async () => {
-const file = imageInput.files[0];
-if (file) {
-const reader = new FileReader();
-reader.onload = async function () {
-const img = new Image();
-img.src = reader.result;
-img.onload = async function () {
-const prediction = await model.predict(img);
-const labelContainer = document.getElementById("label-container");
-labelContainer.innerHTML = "";
-prediction.forEach(pred => {
-if (pred.probability.toFixed(2) > 0.5) { // Set your threshold here
-const classPrediction =
-`${pred.className}: ${pred.probability.toFixed(2)}`;
-const labelDiv = document.createElement("div");
-labelDiv.innerHTML = classPrediction;
-labelContainer.appendChild(labelDiv);
-}
-});
-};
-};
-reader.readAsDataURL(file);
-}
-}
+    const modelURL = "https://teachablemachine.withgoogle.com/models/_kFky0T01/";
+    let model;
 
-window.onload = init;
-</script>
+    const init = async () => {
+      const modelJsonURL = `${modelURL}model.json`;
+      const metadataURL = `${modelURL}metadata.json`;
+      model = await tmImage.load(modelJsonURL, metadataURL);
+      await startCamera();
+    }
+
+    const predict = async () => {
+      const video = document.getElementById('imageInput');
+      const prediction = await model.predict(video);
+      const labelContainer = document.getElementById("label-container");
+      labelContainer.innerHTML = "";
+      prediction.forEach(pred => {
+        if (pred.probability.toFixed(2) > 0.5) { // Set your threshold here
+          const classPrediction =
+            `${pred.className}: ${pred.probability.toFixed(2)}`;
+          const labelDiv = document.createElement("div");
+          labelDiv.innerHTML = classPrediction;
+          labelContainer.appendChild(labelDiv);
+        }
+      });
+    }
+
+    window.onload = init;
+  </script>
 
 </body>
 </html>
