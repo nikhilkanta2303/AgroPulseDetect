@@ -158,7 +158,8 @@ width: 40%;
 
     function switchCamera() {
       facingMode = (facingMode === 'user') ? 'environment' : 'user';
-      webcam.setFacingMode(facingMode); // Set the new facingMode
+      webcam.stop(); // Stop the current stream
+      init(); // Reinitialize the webcam with the new facingMode
     }
 
   </script>
