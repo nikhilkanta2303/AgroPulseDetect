@@ -19,7 +19,7 @@
 
 
 <center>
-<div id="top"><h2 id="title"><span id="titlesplit">Agro</span>Pulse 〽 Detect</h2></div>
+<div id="top"><h2 id="title"><span id="titlesplit">Agro</span>Pulse 〽️ Detect</h2></div>
 <p style="font-size: 12px;color: rgb(184, 40, 40);">_upload plant/crop image by clicking "choose file"</p>
 <input type="file" id="imageInput" accept="image/*">
 <br>
@@ -43,8 +43,8 @@ let model;
 const imageInput = document.getElementById('imageInput');
 
 const init = async () => {
-const modelJsonURL = ${modelURL}model.json;
-const metadataURL = ${modelURL}metadata.json;
+const modelJsonURL = `${modelURL}model.json`;
+const metadataURL = `${modelURL}metadata.json`;
 model = await tmImage.load(modelJsonURL, metadataURL);
 }
 
@@ -62,7 +62,7 @@ labelContainer.innerHTML = "";
 prediction.forEach(pred => {
 if (pred.probability.toFixed(2) > 0.5) { // Set your threshold here
 const classPrediction =
-${pred.className}: ${pred.probability.toFixed(2)};
+`${pred.className}: ${pred.probability.toFixed(2)}`;
 const labelDiv = document.createElement("div");
 labelDiv.innerHTML = classPrediction;
 labelContainer.appendChild(labelDiv);
@@ -79,4 +79,3 @@ window.onload = init;
 
 </body>
 </html>
-
